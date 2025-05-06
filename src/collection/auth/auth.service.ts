@@ -8,6 +8,8 @@ import { JwtPayload } from './interfaces/jwtPayload.interface';
 import { jwtConstants } from './interfaces/auth.const';
 import { randomBytes } from 'crypto';
 import * as bcrypt from 'bcrypt';
+import { RefreshTokenDto } from './dtos/refresh-token.dto';
+import { ChangePasswordDto } from './dtos/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,13 +21,13 @@ export class AuthService {
   ) {}
 
   async getTokenFromUser(username: string) {
-    const user: any = await this.usersService.findUserForLogin(username);
+    const user = await this.usersService.findUserForLogin(username);
+
     if (!user)
       throw new HttpException(
-        'Tài khoản và mật khẩu không đúng!',
+        'Incorrect account and password!',
         HttpStatus.BAD_REQUEST,
       );
-
     return await this.getToken(user);
   }
 
@@ -66,7 +68,7 @@ export class AuthService {
 
     if (!user) {
       throw new HttpException(
-        'Tài khoản và mật khẩu không đúng!',
+        'Incorrect account and password!',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -75,10 +77,54 @@ export class AuthService {
 
     if (!match) {
       throw new HttpException(
-        'Tài khoản và mật khẩu không đúng!',
+        'Incorrect account and password!',
         HttpStatus.BAD_REQUEST,
       );
     }
     return user;
+  }
+
+  async getUserFromJwtPayload({ id }: JwtPayload) {
+    const user = await this.usersService.getProfile(id);
+    if (!user)
+      throw new HttpException('User not found!', HttpStatus.NO_CONTENT);
+    return user;
+  }
+
+  async refreshToken(dto: RefreshTokenDto) {
+    const payload = await this.jwtService.verifyAsync(dto.reset_token, {
+      secret: jwtConstants.secret_refresh,
+    });
+    if (!payload.id) {
+      throw new HttpException('Token is incorrect!', HttpStatus.BAD_REQUEST);
+    }
+    const user = await this.usersService.findById(payload?.id);
+    if (!user) {
+      throw new HttpException('Account not found!', HttpStatus.BAD_REQUEST);
+    }
+
+    return await this.getToken(user);
+  }
+
+  async changePassword(jwt: JwtPayload, dto: ChangePasswordDto) {
+    const token = await this.module.findOne({ userId: jwt.id }).exec();
+    if (token) await token.deleteOne();
+    const user = await this.usersService.changePassword(jwt, dto);
+    return await this.getToken(user);
+  }
+
+  async initAdmin() {
+    const admin = await this.usersService.findAdmin();
+    if (!admin) {
+      await this.usersService.createAdmin({
+        username: 'admin',
+        password: 'Abc@123',
+      });
+    }
+    return;
+  }
+
+  async init() {
+    await Promise.all([this.initAdmin()]);
   }
 }

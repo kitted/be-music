@@ -1,5 +1,5 @@
 import { PublicController } from '../decorators/swagger';
-import { Body, Get, Post } from '@nestjs/common';
+import { Body, Post } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { CreateUserDto } from 'src/collection/users/dtos/create-user.dto';
 import { UsersService } from 'src/collection/users/users.service';

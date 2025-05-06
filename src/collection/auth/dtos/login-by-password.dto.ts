@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, Length } from 'class-validator';
 
 export class LoginByPasswordDto {
-  @ApiProperty({ required: true, type: String, example: 'admin' })
+  @ApiProperty({ required: true, type: String, example: 'abc' })
   @IsString()
   username: string;
 
