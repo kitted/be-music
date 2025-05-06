@@ -9,7 +9,7 @@ export class CreateUserDto {
     example: 'Marcus',
   })
   @IsString()
-  name: string;
+  username: string;
 
   @ApiProperty({
     required: true,

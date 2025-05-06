@@ -4,8 +4,8 @@ import { RoleEnum } from '../interfaces/role.enum';
 import { Exclude } from 'class-transformer';
 
 export class Users extends BaseModel {
-  @prop()
-  username?: string;
+  @prop({ required: true, unique: true })
+  username: string;
 
   @Exclude()
   @prop({ required: true })

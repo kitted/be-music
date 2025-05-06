@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -9,11 +8,13 @@ import mongoose from 'mongoose';
 import { SoftDelete } from 'soft-delete-mongoose-plugin';
 import { PublicModule } from './rest/public/public.controller';
 import { RouterModule } from '@nestjs/core';
+import { AuthModule } from './collection/auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypegooseModule.forRoot(process.env.MONGO),
+    AuthModule,
     UsersModule,
     PublicModule,
     RouterModule.register([
@@ -28,11 +29,11 @@ import { RouterModule } from '@nestjs/core';
 })
 export class AppModule {
   constructor() {
-    mongoose.plugin(
-      new SoftDelete({
-        isDeletedField: 'isDeleted',
-        deletedAtField: 'deletedAt',
-      }).getPlugin(),
-    );
+    // mongoose.plugin(
+    //   new SoftDelete({
+    //     isDeletedField: 'isDeleted',
+    //     deletedAtField: 'deletedAt',
+    //   }).getPlugin(),
+    // );
   }
 }
